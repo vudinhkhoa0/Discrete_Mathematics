@@ -1,52 +1,83 @@
 #include <iostream>
-#include <vector>
 #include <queue>
+#include <vector>
 
 using namespace std;
-typedef long long ll;
-
-struct edge
+int n;
+class Edge
 {
     public:
-        int source;
-        int dest;
-        int weight;
+        int source, dest, weight;
+        Edge(){};
+        friend istream& operator >> (istream&, Edge&);
+        friend ostream& operator << (ostream&, Edge);
+        ~Edge(){};
 };
-
-struct node 
+class node
 {
-    int id;
-    int dist;
-    bool visited;
+    public:
+        int id, dist;
+        bool visited;
+        node(int id, int dist, bool visited)
+        {
+            this->id = id;
+            this->dist = dist;
+            this->visited = visited;
+        };
+        ~node(){};
 };
+vector <Edge> edges;
 
+istream& operator >> (istream& in, Edge &orther)
+{
+    in >> orther.source >> orther.dest >> orther.weight;
+    return in;
+}
+
+ostream& operator << (ostream& out, Edge orther)
+{
+    out << orther.source << " " << orther.dest << " " << orther.weight << "\n";
+    return out;
+}
+
+void Open()
+{
+    cin >> n;
+    for (int i = 0; i < n; i++) 
+    {
+        Edge x;
+        cin >> x;
+        edges.push_back(x);
+        // Nhap chiều thứ hai(đề bài là 1 chiều thì không cần dùng):
+        swap(x.dest, x.source);
+        edges.push_back(x);
+    }
+}
 bool operator < (const node& leftHandSide, const node& rightHandSide)
 {
     return leftHandSide.dist > rightHandSide.dist;
 }
 
-void dijkstra(int n, int source, const vector <edge> edges)
+vector <int> Dijkstra(int source)
 {
     priority_queue <node> pq;
     pq.push({source, 0, false});
-
-    vector <ll> distance(n, INT_MAX);
+    vector <int> distance(n, INT_MAX);
     distance[source] = 0;
-
     while (!pq.empty())
     {
         node u = pq.top();
         pq.pop();
-
+    
         if (u.visited) continue;
         u.visited = true;
-
-        for (edge e : edges)
+    
+        for (Edge e : edges)
         {
             if (e.source == u.id)
             {
                 int v = e.dest;
-                int dist = u.dist + e.weight;
+                int dist = distance[u.id] + e.weight;
                 if (dist < distance[v])
                 {
                     distance[v] = dist;
@@ -55,26 +86,21 @@ void dijkstra(int n, int source, const vector <edge> edges)
             }
         }
     }
-    for (int i = 0; i < n; i ++)
-        cout << distance[i] << " ";
+    return distance;
 }
 
-void Open(int &n, vector <edge> &edges)
+void Print(const vector <int> distance)
 {
-    cin >> n;
-    for (int i = 0; i < n; i ++)
-    {
-        int source, dest, weight;
-        cin >> source >> dest >> weight;
-        edges.push_back({source, dest, weight});
-    }
+    cout << "Distance from 0 to each point in the table: \n";
+    for (int i = 0; i < n; i++) 
+    cout << i << ": " << distance[i] << "\n";
 }
 
 int main()
 {
-    int n;
-    vector <edge> edges;
-    Open(n, edges);
-    dijkstra(n, 0, edges);
+    Open();
+    vector <int> distance;
+    distance = Dijkstra(0);
+    Print(distance);
     return 0;
 }
